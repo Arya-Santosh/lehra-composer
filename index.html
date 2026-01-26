@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lehra Composer Royal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="frame-container">
+        <div class="main-panel">
+            
+            <div class="top-bar">
+                <div class="logo">LehraComposer</div>
+                <div class="status-readout" id="layaDisplay">Ready</div>
+            </div>
+
+            <div class="dashboard-grid">
+                
+                <div class="dial-section">
+                    <div class="visualizer-ring-container">
+                        <div id="beatCircle" class="beat-circle"></div>
+                        <div class="center-readout">
+                            <div class="label-tiny">BPM</div>
+                            <div class="bpm-big" id="bpmDisplay">100</div>
+                            <div class="label-tiny">MATRA</div>
+                            <div class="matra-big" id="currentMatra">1</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    
+                    <div class="instrument-tabs">
+                        <label>INSTRUMENT</label>
+                        <select id="instrumentSelect" class="hardware-select">
+                            <option value="santoor">Santoor</option>
+                            <option value="sarangi">Sarangi</option>
+                            <option value="harmonium">Harmonium</option>
+                        </select>
+                    </div>
+
+                    <div class="dual-dropdowns">
+                        <div class="control-block">
+                            <label>TAAL</label>
+                            <select id="taalSelect" class="hardware-select">
+                                <option value="teental">Teental (16)</option>
+                                <option value="rupak">Rupak (7)</option>
+                                <option value="jhaptal">Jhaptal (10)</option>
+                                <option value="dadra">Dadra (6)</option>
+                                <option value="keherwa">Keherwa (8)</option>
+                            </select>
+                        </div>
+                        <div class="control-block">
+                            <label>RAAG</label>
+                            <select id="raagSelect" class="hardware-select">
+                                <option value="kirwani">Kirwani</option>
+                                <option value="yaman">Yaman</option>
+                                <option value="charukeshi">Charukeshi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="slider-box">
+    <div class="slider-row">
+        <div class="fader-label">
+            <span>TEMPO</span>
+            <span id="tempoValueLabel" class="value-readout">100 BPM</span> 
+        </div>
+        <input type="range" id="tempoSlider" min="40" max="300" value="100">
+    </div>
+                    <div class="slider-row" style="display: flex; align-items: center; gap: 15px;">
+        
+        <div style="flex-grow: 1;">
+            <div class="fader-label">
+                <span>PITCH OFFSET</span>
+                <span id="pitchDisplay" class="value-readout">0</span>
+            </div>
+            <input type="range" id="pitchSlider" min="-12" max="12" value="0" step="1">
+        </div>
+        <div class="key-gauge">
+            <div class="key-label">KEY</div>
+            <div id="absKeyDisplay" class="key-value">C</div>
+        </div>
+
+    </div>
+</div>
+
+                    <div class="toggles-box">
+    <div class="toggle-group">
+        <div class="toggle-header">
+            <label>TANPURA</label>
+            <label class="switch">
+                <input type="checkbox" id="tanpuraToggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="mini-volume-wrapper">
+            <label style="font-size:9px; margin:0;">VOL</label>
+            <input type="range" id="tanpuraVolume" min="-30" max="0" value="-10" class="mini-fader">
+        </div>
+    </div>
+                        
+
+                        <div class="toggle-group" style="border-left: 1px solid #333; padding-left: 10px;">
+        <div class="toggle-header">
+            <label>RIYAZ MODE</label>
+            <label class="switch">
+                <input type="checkbox" id="practiceModeToggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div style="height: 15px;"></div> 
+    </div>
+</div>
+                    
+                    <div id="practiceSettings">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span>+</span>
+                            <input type="number" id="bpmIncreaseStep" value="2" min="1" class="big-input">
+                            <span>BPM /</span>
+                            <input type="number" id="intervalMinutes" value="1" min="1" class="big-input">
+                            <span>min</span>
+                        </div>
+                        <div id="nextJumpDisplay" style="color:var(--cyan-glow);"></div>
+                    </div>
+
+                    <button id="playBtn" class="gold-button">
+                        <span class="play-icon">▶</span> START
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

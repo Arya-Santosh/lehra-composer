@@ -1,0 +1,424 @@
+/* --- VARIABLES --- */
+/* Import Digital Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;700&display=swap');
+
+/* --- VARIABLES --- */
+:root {
+    --bg-frame: #1a1a1a;
+    --bg-panel: #222;
+    --gold-dark: #8a6d1c;
+    --gold-bright: #d4af37;
+    --cyan-glow: #00e5ff;
+    --text-main: #cfcfcf;
+}
+
+body {
+    margin: 0;
+    /* THE NEW BACKGROUND */
+    background-color: #050505;
+    background-image: 
+        /* A subtle "spotlight" in the center */
+        radial-gradient(circle at center, #1a1a1a 0%, #000000 80%),
+        /* A faint noise texture for realism */
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Update Digital Numbers */
+.bpm-big, .key-value, .value-readout {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+
+/* --- THE FRAME (Responsive Container) --- */
+.frame-container {
+    width: 100%;
+    max-width: 850px;
+    padding: 10px;
+    box-sizing: border-box;
+    /* Add a deep shadow to make the device look like it's floating */
+    filter: drop-shadow(0 0 50px rgba(212, 175, 55, 0.1)); 
+}
+
+.main-panel {
+    background: var(--bg-frame);
+    border: 2px solid var(--gold-dark);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+/* --- HEADER --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.logo {
+    color: var(--gold-bright);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.status-readout {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--cyan-glow);
+}
+
+/* --- LAYOUT GRID (The Magic Switch) --- */
+.dashboard-grid {
+    display: flex;
+    gap: 40px; /* More space between ring and controls */
+    flex-wrap: wrap; /* CRITICAL: Allows stacking if screen gets too tight */
+    justify-content: center;
+}
+
+/* --- LEFT SIDE: THE DIAL --- */
+.dial-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 280px; /* CRITICAL: Prevents ring from overlapping controls */
+    min-height: 280px;
+}
+/* Add this INSIDE .visualizer-ring-container rule or after it */
+.visualizer-ring-container {
+    position: relative;
+    width: 240px; 
+    height: 240px;
+    /* ... existing border/background code ... */
+    border-radius: 50%;
+    border: 3px solid var(--gold-dark);
+    background: radial-gradient(circle, #222 30%, #111 100%);
+    box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Keep it above background stuff */
+}
+/* Center Text inside Ring */
+.center-readout {
+    text-align: center;
+    z-index: 10;
+}
+
+.bpm-big {
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
+}
+
+.matra-big {
+    font-size: 24px;
+    color: var(--cyan-glow);
+}
+
+/* The Dots - Centered Logic */
+.beat-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #444;
+    border-radius: 50%;
+    /* This centers the dots relative to the container center */
+    left: 50%;
+    top: 50%;
+    margin-left: -6px; /* Half of width */
+    margin-top: -6px;  /* Half of height */
+    transition: 0.1s;
+}
+
+.beat-dot.active {
+    background: var(--cyan-glow);
+    box-shadow: 0 0 10px var(--cyan-glow);
+    transform: scale(1.4);
+}
+
+.beat-dot.active-sam {
+    background: var(--gold-bright);
+    box-shadow: 0 0 15px var(--gold-bright);
+    transform: scale(1.6);
+}
+
+/* --- RIGHT SIDE: CONTROLS --- */
+.controls-section {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    display: block;
+    font-size: 10px;
+    color: #888;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Dropdowns */
+.hardware-select {
+    width: 100%;
+    background: #252525;
+    color: var(--gold-bright);
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+}
+
+.dual-dropdowns {
+    display: flex;
+    gap: 10px;
+}
+.control-block { flex: 1; }
+
+/* Sliders */
+.slider-box {
+    background: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+.slider-row { margin-bottom: 12px; }
+.slider-row:last-child { margin-bottom: 0; }
+
+input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    margin-top: -6px;
+    cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+}
+
+/* Toggles Box */
+.toggles-box {
+    display: flex;
+    justify-content: space-between;
+    background: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+/* Toggle Switch CSS */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    margin-top: 2px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444;
+    transition: .4s;
+    border-radius: 34px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px; width: 12px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--cyan-glow); }
+input:checked + .slider:before { transform: translateX(16px); }
+
+/* Riyaz Settings (The Missing Controls) */
+#practiceSettings {
+    display: none; /* Hidden by default, JS toggles to 'flex' */
+    background: #222;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    font-size: 11px;
+    color: #aaa;
+}
+#practiceSettings input.big-input {
+    width: 50px;       /* Wider */
+    height: 30px;      /* Taller to make arrows bigger */
+    font-size: 16px;   /* Bigger text */
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    /* This property forces modern browsers to make the click area larger */
+    padding-left: 10px; 
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {  
+   opacity: 1;
+   height: 30px; /* Match input height */
+}
+
+/* Main Button */
+.gold-button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold-dark));
+    border: none;
+    border-radius: 50px;
+    color: #111;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* --- MOBILE OPTIMIZATION (The Vertical Mode) --- */
+@media (max-width: 768px) {
+    .dashboard-grid {
+    display: flex;
+    gap: 40px; /* More space between ring and controls */
+    flex-wrap: wrap; /* CRITICAL: Allows stacking if screen gets too tight */
+    justify-content: center;
+}
+    
+    .dial-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 280px; /* CRITICAL: Prevents ring from overlapping controls */
+    min-height: 280px;
+}
+
+    .visualizer-ring-container {
+    position: relative;
+    width: 240px; 
+    height: 240px;
+    /* ... existing border/background code ... */
+    border-radius: 50%;
+    border: 3px solid var(--gold-dark);
+    background: radial-gradient(circle, #222 30%, #111 100%);
+    box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Keep it above background stuff */
+}
+    
+    .main-panel {
+        padding: 15px;
+    }
+    
+    .gold-button {
+        padding: 18px; /* Bigger touch target */
+        font-size: 18px;
+    }
+}
+
+/* --- KEY GAUGE (The Glowing Circle) --- */
+.key-gauge {
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, #222 40%, #111 100%);
+    border: 2px solid var(--gold-dark);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.8);
+    flex-shrink: 0; /* Don't squash it */
+}
+
+.key-label {
+    font-size: 8px;
+    color: #666;
+    letter-spacing: 1px;
+    margin-top: -2px;
+}
+
+.key-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--cyan-glow);
+    text-shadow: 0 0 5px var(--cyan-glow);
+    line-height: 1;
+}
+
+/* --- TANPURA VOLUME (Mini Fader) --- */
+.toggles-box {
+    /* Update existing to handle the new columns */
+    display: flex;
+    gap: 10px;
+    background: #252525;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.toggle-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.mini-volume-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1a1a1a;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+input[type=range].mini-fader {
+    height: 3px; /* Thinner track */
+}
+
+input[type=range].mini-fader::-webkit-slider-thumb {
+    height: 10px; /* Smaller thumb */
+    width: 10px;
+    margin-top: -3.5px;
+}
