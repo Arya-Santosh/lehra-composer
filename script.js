@@ -7,6 +7,8 @@ let cycleCount = 0; // Tracks number of completed Avartans
 const mutePatternSelect = document.getElementById('mutePattern');
 let sessionStartTime = null;
 let isSessionActive = false;
+let nextBuffer = null;
+let isPreloading = false;
 // --- 1. DOM ELEMENTS ---
 const playBtn = document.getElementById('playBtn');
 const tempoSlider = document.getElementById('tempoSlider');
@@ -88,41 +90,30 @@ function getBaseBpmForLaya(laya) {
     return 100;
 }
 
-function loadCorrectLehra() {
-    const selectedTaal = taalSelect.value;
-    const selectedRaag = raagSelect.value;
-    const selectedInstrument = instrumentSelect.value;
-    const laya = getLayaCategory(currentBpm);
-    
-    // Construct the filename we EXPECT to find
-    const fileName = `${selectedTaal}_${selectedRaag}_${laya}_${selectedInstrument}.mp3`;
+function loadCorrectLehra(targetLaya = null) {
+    const laya = targetLaya || getLayaCategory(currentBpm);
+    const fileName = `${taalSelect.value}_${raagSelect.value}_${laya}_${instrumentSelect.value}.mp3`;
     const fullPath = `assets/audio/${fileName}`;
-    
-    console.log("Attempting to load:", fullPath);
-    layaDisplay.innerText = `Loading: ${fileName}...`;
-    layaDisplay.style.color = "#ffff00"; // Yellow for "Loading"
 
-    // Create the buffer with an Error Handler
-    const newBuffer = new Tone.ToneAudioBuffer(
-        fullPath, 
-        // 1. ON SUCCESS
-        () => {
-            currentLayaState = laya;
-            activeFileBaseBpm = getBaseBpmForLaya(laya);
-            
-            player.buffer = newBuffer; // Swap the audio
-            console.log("Success! Playing:", fileName);
-            
-            layaDisplay.innerText = `Playing: ${fileName} (Base: ${activeFileBaseBpm})`;
-            layaDisplay.style.color = "#00ffcc"; // Cyan for "Success"
-        },
-        // 2. ON ERROR (File Missing)
-        (e) => {
-            console.error("File not found:", fullPath);
-            layaDisplay.innerText = `❌ Error: Missing file ${fileName}`;
-            layaDisplay.style.color = "#ff4d4d"; // Red for "Error"
-        }
-    );
+    layaDisplay.innerText = `Loading ${laya}...`;
+
+    const newBuffer = new Tone.ToneAudioBuffer(fullPath, () => {
+        // Apply the new audio and update the math base simultaneously
+        player.buffer = newBuffer;
+        currentLayaState = laya;
+        activeFileBaseBpm = getBaseBpmForLaya(laya);
+        
+        // Final sync of playback rate
+        player.playbackRate = currentBpm / activeFileBaseBpm;
+        
+        isPreloading = false;
+        layaDisplay.innerText = `Playing: ${laya}`;
+        layaDisplay.style.color = "#00ffcc";
+    }, (err) => {
+        console.error("Path error:", fullPath);
+        layaDisplay.innerText = "❌ Missing File";
+        isPreloading = false;
+    });
 }
 
 function updateTaalVisuals() {
@@ -197,34 +188,24 @@ Tone.Draw.schedule(() => {
 // --- 7. HELPER FUNCTIONS ---
 
 function startAudioLoop() {
-    // 1. Clear any existing loop to prevent double-playing
+    if (!player.buffer || !player.buffer.loaded) return;
+
     if (audioLoopEventId !== null) {
         Tone.Transport.clear(audioLoopEventId);
     }
 
-    // 2. Calculate the loop duration based on the selected Taal
-    // "1m" = 4 beats. 
-    // Format "0:0:0" -> "Measures:Beats:Sixteenths"
     const beatCount = taals[taalSelect.value].beats;
-    
-    // We convert beats to measures. 
-    // e.g. Teental (16) = 4 measures. Rupak (7) = 1 measure + 3 beats.
-    // Tone.js notation: "1m" = 4 beats.
-    // Easiest way: Use "4n" (quarter note) * count
-    const interval = beatCount + "n"; // e.g. "16n" is wrong. "4n * 16" is better?
-    
-    // Better: Calculation in seconds is risky. Calculation in notation is best.
-    // Let's use the measure:beat format string.
     const measures = Math.floor(beatCount / 4);
     const remainingBeats = beatCount % 4;
     const intervalString = `${measures}:${remainingBeats}:0`;
 
-    console.log("Loop Interval set to:", intervalString);
-
-    // 3. Schedule the loop
+    // Schedule future loops
     audioLoopEventId = Tone.Transport.scheduleRepeat((time) => {
         player.start(time);
     }, intervalString, "0:0:0");
+
+    // IMPORTANT: Start the first one IMMEDIATELY since we just reset Transport.position to 0
+    player.start(Tone.now());
 }
 
 function updateVisuals(index) {
@@ -266,7 +247,18 @@ function applyTempoChange() {
     const step = parseInt(bpmIncreaseStep.value);
     currentBpm += step;
     if (currentBpm > 300) currentBpm = 300;
+    
     updateTempo(currentBpm);
+
+    // If we have a preloaded buffer ready, swap it at the Sam
+    if (nextBuffer) {
+        player.buffer = nextBuffer;
+        currentLayaState = getLayaCategory(currentBpm);
+        activeFileBaseBpm = getBaseBpmForLaya(currentLayaState);
+        nextBuffer = null; // Reset
+        console.log("Swapped to new Laya buffer seamlessly.");
+    }
+
     document.body.style.backgroundColor = "#1a332a";
     setTimeout(() => { document.body.style.backgroundColor = "#121212"; }, 500);
     pendingBpmIncrease = false;
@@ -277,17 +269,32 @@ function updateTempo(newBpm) {
     currentBpm = newBpm;
     bpmDisplay.innerText = currentBpm;
     tempoSlider.value = currentBpm;
-    
-    // --- NEW LINE: Update the slider label text ---
     if(tempoValueLabel) tempoValueLabel.innerText = `${currentBpm} BPM`;
 
-    // ... existing code ...
-    const newLaya = getLayaCategory(currentBpm);
-    if (newLaya !== currentLayaState) {
-        loadCorrectLehra();
+    const neededLaya = getLayaCategory(currentBpm);
+
+    // 1. File Swap Logic
+    if (neededLaya !== currentLayaState && !isPreloading) {
+        isPreloading = true;
+        loadCorrectLehra(neededLaya);
     }
+
+    // 2. Sync Math
     player.playbackRate = currentBpm / activeFileBaseBpm;
     Tone.Transport.bpm.value = currentBpm;
+
+    // 3. THE FIX: Mid-Loop Resync
+    if (isPlaying) {
+        // Stop current audio
+        player.stop(); 
+        
+        // RESET THE CLOCK: This forces the visual dots back to the "Sam" (Beat 1)
+        // so they stay perfectly in sync with the new audio loop start.
+        Tone.Transport.position = 0; 
+        
+        // Restart the audio loop logic with new tempo calculations
+        startAudioLoop(); 
+    }
 }
 
 // Western Scale (12 Semitones)
@@ -357,41 +364,63 @@ practiceToggle.addEventListener('change', (e) => {
 
 playBtn.addEventListener('click', async () => {
     await Tone.start();
-    
+    console.log("Audio Engine Started");
+
     if (!isPlaying) {
         // --- START LOGIC ---
-        loadCorrectLehra();
+        // 1. Determine Laya BEFORE starting
+        const initialLaya = getLayaCategory(currentBpm);
+        activeFileBaseBpm = getBaseBpmForLaya(initialLaya);
+        currentLayaState = initialLaya;
+
+        // 2. If the player is totally empty, do a hard load
+        if (!player.buffer || !player.buffer.loaded) {
+            loadCorrectLehra(); 
+        }
+
+        // 3. Set the math correctly
+        player.playbackRate = currentBpm / activeFileBaseBpm;
         Tone.Transport.bpm.value = currentBpm;
         
-        startAudioLoop(); // START THE DYNAMIC LOOP
-        
+        // 4. Fire the engines
+        startAudioLoop();
         Tone.Transport.start();
-        lastJumpTime = Tone.Transport.seconds;
+        
         isPlaying = true;
-        
-        // SESSION LOGGER: Start timing now
-        startSessionTimer();
-        
-        manageTanpuraState();
-        
         playBtn.innerText = "STOP";
         playBtn.style.background = "#ff4d4d";
         playBtn.style.color = "white";
-
+        startSessionTimer();
     } else {
         // --- STOP LOGIC ---
         Tone.Transport.stop();
-        if (audioLoopEventId !== null) Tone.Transport.clear(audioLoopEventId); 
+        if (audioLoopEventId !== null) Tone.Transport.clear(audioLoopEventId);
         player.stop();
         isPlaying = false;
         
-        // SESSION LOGGER: Save the practice time now
+        // Reset UI
+        Tone.Transport.position = 0;
+        document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active', 'active-sam'));
+        currentMatraDisplay.innerText = "1";
+        
+        playBtn.innerText = "START";
+        playBtn.style.background = "linear-gradient(145deg, #d4af37, #aa8c2c)";
+        playBtn.style.color = "#121212";
+
+        manageTanpuraState();
+        stopAndSaveSession();
+        cycleCount = 0;
+        player.mute = false;
+    }
+});
+        
+        // 2. Save progress
         stopAndSaveSession();
         
-        // Reset Cycle Count for Silent Cycles
-        cycleCount = 0; 
+        // 3. Reset UI and engine state
+        isPlaying = false;
+        cycleCount = 0;
         player.mute = false;
-
         manageTanpuraState();
         
         Tone.Transport.position = 0;
@@ -401,8 +430,7 @@ playBtn.addEventListener('click', async () => {
         playBtn.innerText = "START";
         playBtn.style.background = "linear-gradient(145deg, #d4af37, #aa8c2c)";
         playBtn.style.color = "#121212";
-    }
-});
+    
 
 // Prevent negative/zero inputs for Riyaz
 const enforceMin = (e) => {
@@ -415,21 +443,12 @@ intervalMinutes.addEventListener('change', enforceMin);
 document.querySelectorAll('.t-btn').forEach(button => {
     button.addEventListener('click', () => {
         let newBpm = currentBpm;
-
-        // Handle Nudges (+1, -5, etc)
-        if (button.dataset.change) {
-            newBpm += parseInt(button.dataset.change);
-        }
-
-        // Handle Multipliers (0.5x, 2x)
-        if (button.dataset.multi) {
-            newBpm = Math.round(currentBpm * parseFloat(button.dataset.multi));
-        }
-
-        // Enforce Min/Max boundaries (40 - 300)
+        if (button.dataset.change) newBpm += parseInt(button.dataset.change);
+        if (button.dataset.multi) newBpm = Math.round(currentBpm * parseFloat(button.dataset.multi));
+        
         newBpm = Math.max(40, Math.min(300, newBpm));
 
-        // Use our existing update function to sync everything
+        // This call will now trigger the "Immediate Swap" logic we wrote above
         updateTempo(newBpm);
     });
 });
@@ -511,3 +530,5 @@ function showPracticeHistory() {
 
     alert(message);
 }
+
+loadCorrectLehra();
