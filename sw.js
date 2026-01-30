@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lehra-v4'; // Increment version to force update
+const CACHE_NAME = 'lehra-v3.1.2'; // Increment version to force update
 
 // List EVERY file you want available offline immediately
 const PRE_CACHE_ASSETS = [
