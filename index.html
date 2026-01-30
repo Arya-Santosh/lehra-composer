@@ -6,6 +6,8 @@
     <title>Lehra Composer Royal</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d4af37">
 </head>
 <body>
 
@@ -137,5 +139,14 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('PWA Ready:', reg.scope))
+        .catch(err => console.log('PWA Failed:', err));
+    });
+  }
+</script>
 </body>
 </html>
