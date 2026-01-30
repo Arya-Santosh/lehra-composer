@@ -83,17 +83,23 @@
 
             <input type="range" id="tempoSlider" min="40" max="300" value="100">
         </div>
-        <div style="flex-grow: 1;">
-            <div class="fader-label">
-                <span>PITCH OFFSET</span>
-                <span id="pitchDisplay" class="value-readout">0</span>
+            <div class="slider-row">
+        <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom:10px;">
+            <label style="margin:0;">PITCH OFFSET (<span id="pitchDisplay">0</span>)</label>
+            
+            <div class="pitch-btn-group">
+                <button class="p-btn" data-pitch="-1">-1</button>
+                <button class="p-btn reset" data-pitch="0">RESET</button>
+                <button class="p-btn" data-pitch="+1">+1</button>
             </div>
-            <input type="range" id="pitchSlider" min="-12" max="12" value="0" step="1">
+
+            <div class="key-gauge">
+                <div class="key-label">KEY</div>
+                <div id="absKeyDisplay" class="key-value">C</div>
+            </div>
         </div>
-        <div class="key-gauge">
-            <div class="key-label">KEY</div>
-            <div id="absKeyDisplay" class="key-value">C</div>
-        </div>
+        <input type="range" id="pitchSlider" min="-12" max="12" value="0" step="1">
+    </div>
 
     </div>
 </div>

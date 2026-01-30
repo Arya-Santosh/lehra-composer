@@ -465,3 +465,41 @@ input[type=range].mini-fader::-webkit-slider-thumb {
     .tempo-btn-grid { gap: 8px; }
     .t-btn { padding: 12px 0; font-size: 12px; }
 }
+
+.pitch-btn-group {
+    display: flex;
+    gap: 8px;
+    background: #1a1a1a;
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+.p-btn {
+    background: #252525;
+    border: 1px solid #444;
+    color: var(--text-main);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.p-btn:active {
+    background: var(--cyan-glow);
+    color: #000;
+    border-color: var(--cyan-glow);
+}
+
+.p-btn.reset {
+    color: var(--gold-bright);
+    border-color: var(--gold-dark);
+}
+
+.p-btn.reset:active {
+    background: var(--gold-bright);
+    color: #000;
+}

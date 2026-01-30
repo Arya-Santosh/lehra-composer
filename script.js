@@ -382,3 +382,28 @@ document.querySelectorAll('.t-btn').forEach(button => {
         updateTempo(newBpm);
     });
 });
+
+// Pitch Button Logic
+document.querySelectorAll('.p-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const change = parseInt(button.dataset.pitch);
+        let newPitch;
+
+        if (change === 0) {
+            newPitch = 0; // Reset to C
+        } else {
+            // Add nudge to current value
+            newPitch = parseInt(pitchSlider.value) + change;
+        }
+
+        // Keep within -12 to +12 range
+        newPitch = Math.max(-12, Math.min(12, newPitch));
+
+        // Sync UI Slider
+        pitchSlider.value = newPitch;
+        
+        // Trigger the existing logic to update Audio and Key Display
+        // We manually dispatch an 'input' event so the existing listener runs
+        pitchSlider.dispatchEvent(new Event('input'));
+    });
+});
