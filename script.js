@@ -3,6 +3,8 @@
 // ==========================================
 // Give the engine a 100ms cushion to prevent stutters
 Tone.context.lookAhead = 0.1;
+let cycleCount = 0; // Tracks number of completed Avartans
+const mutePatternSelect = document.getElementById('mutePattern');
 // --- 1. DOM ELEMENTS ---
 const playBtn = document.getElementById('playBtn');
 const tempoSlider = document.getElementById('tempoSlider');
@@ -156,6 +158,38 @@ Tone.Transport.scheduleRepeat((time) => {
         if (isPracticeMode && isPlaying && !pendingBpmIncrease) checkAutoIncrease();
         if (currentBeatIndex === 0 && pendingBpmIncrease) applyTempoChange();
     }, time);
+    // ... inside the Tone.Draw.schedule block from image_740613.png ...
+Tone.Draw.schedule(() => {
+    updateVisuals(currentBeatIndex);
+
+    // LOGIC FOR THE SAM (Beat 1)
+    if (currentBeatIndex === 0) {
+        cycleCount++; // Every time we hit the Sam, increment the cycle
+        
+        const pattern = parseInt(mutePatternSelect.value);
+        if (pattern > 0) {
+            const totalSet = pattern + 1;
+            
+            // Check if this is the "Silent" cycle
+            if (cycleCount % totalSet === 0) {
+                player.mute = true;
+                layaDisplay.innerText = "🔇 SILENT CYCLE";
+                layaDisplay.style.color = "#ff4d4d";
+            } else {
+                player.mute = false;
+                layaDisplay.innerText = `Cycle ${cycleCount % totalSet || pattern} of ${pattern}`;
+                layaDisplay.style.color = "var(--cyan-glow)";
+            }
+        } else {
+            player.mute = false;
+        }
+
+        // Keep your existing tempo logic here:
+        if (isPracticeMode && isPlaying && pendingBpmIncrease) applyTempoChange();
+    }
+
+    if (isPracticeMode && isPlaying && !pendingBpmIncrease) checkAutoIncrease();
+}, time);
 }, "4n");
 
 // --- 7. HELPER FUNCTIONS ---
@@ -407,3 +441,6 @@ document.querySelectorAll('.p-btn').forEach(button => {
         pitchSlider.dispatchEvent(new Event('input'));
     });
 });
+
+
+

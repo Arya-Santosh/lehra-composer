@@ -503,3 +503,36 @@ input[type=range].mini-fader::-webkit-slider-thumb {
     background: var(--gold-bright);
     color: #000;
 }
+
+/* Style for the Silent Cycles Container */
+.control-group {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text-main);
+}
+
+.styled-select {
+    background: #111;
+    border: 1px solid var(--gold-dark);
+    color: var(--gold-bright);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+}
+
+.styled-select:hover {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
