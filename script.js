@@ -5,6 +5,8 @@
 Tone.context.lookAhead = 0.1;
 let cycleCount = 0; // Tracks number of completed Avartans
 const mutePatternSelect = document.getElementById('mutePattern');
+let sessionStartTime = null;
+let isSessionActive = false;
 // --- 1. DOM ELEMENTS ---
 const playBtn = document.getElementById('playBtn');
 const tempoSlider = document.getElementById('tempoSlider');
@@ -357,30 +359,45 @@ playBtn.addEventListener('click', async () => {
     await Tone.start();
     
     if (!isPlaying) {
+        // --- START LOGIC ---
         loadCorrectLehra();
         Tone.Transport.bpm.value = currentBpm;
         
-        // START THE DYNAMIC LOOP
-        startAudioLoop();
+        startAudioLoop(); // START THE DYNAMIC LOOP
         
         Tone.Transport.start();
         lastJumpTime = Tone.Transport.seconds;
         isPlaying = true;
+        
+        // SESSION LOGGER: Start timing now
+        startSessionTimer();
+        
         manageTanpuraState();
         
         playBtn.innerText = "STOP";
         playBtn.style.background = "#ff4d4d";
         playBtn.style.color = "white";
+
     } else {
+        // --- STOP LOGIC ---
         Tone.Transport.stop();
-        if (audioLoopEventId !== null) Tone.Transport.clear(audioLoopEventId); // Stop the scheduler
+        if (audioLoopEventId !== null) Tone.Transport.clear(audioLoopEventId); 
         player.stop();
         isPlaying = false;
+        
+        // SESSION LOGGER: Save the practice time now
+        stopAndSaveSession();
+        
+        // Reset Cycle Count for Silent Cycles
+        cycleCount = 0; 
+        player.mute = false;
+
         manageTanpuraState();
         
         Tone.Transport.position = 0;
         document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active', 'active-sam'));
         currentMatraDisplay.innerText = "1";
+        
         playBtn.innerText = "START";
         playBtn.style.background = "linear-gradient(145deg, #d4af37, #aa8c2c)";
         playBtn.style.color = "#121212";
@@ -442,5 +459,55 @@ document.querySelectorAll('.p-btn').forEach(button => {
     });
 });
 
+function startSessionTimer() {
+    sessionStartTime = Date.now();
+    isSessionActive = true;
+    console.log("Riyaz session started.");
+}
 
+function stopAndSaveSession() {
+    if (!isSessionActive || !sessionStartTime) return;
 
+    const endTime = Date.now();
+    const durationMs = endTime - sessionStartTime;
+    const durationMins = Math.floor(durationMs / 60000); // Convert milliseconds to minutes
+
+    // Only save if the practice lasted at least 1 minute
+    if (durationMins >= 1) {
+        let history = JSON.parse(localStorage.getItem('lehraHistory') || '[]');
+        
+        const newEntry = {
+            date: new Date().toLocaleDateString(),
+            duration: durationMins,
+            raag: document.getElementById('raagSelect').value,
+            timestamp: endTime
+        };
+
+        history.push(newEntry);
+        localStorage.setItem('lehraHistory', JSON.stringify(history));
+        console.log(`Saved: ${durationMins} mins of ${newEntry.raag}`);
+    }
+
+    // Reset for next time
+    isSessionActive = false;
+    sessionStartTime = null;
+}
+
+function showPracticeHistory() {
+    const history = JSON.parse(localStorage.getItem('lehraHistory') || '[]');
+    
+    if (history.length === 0) {
+        alert("No sessions logged yet. Practice for at least 1 minute!");
+        return;
+    }
+
+    let totalMinutes = history.reduce((sum, session) => sum + session.duration, 0);
+    let message = `🏆 Total Practice: ${totalMinutes} minutes\n\nRecent Sessions:\n`;
+    
+    // Show last 5 sessions
+    history.slice(-5).reverse().forEach(s => {
+        message += `• ${s.date}: ${s.duration}m (${s.raag})\n`;
+    });
+
+    alert(message);
+}

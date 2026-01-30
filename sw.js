@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lehra-v3.2.1'; // Increment version to force update
+const CACHE_NAME = 'lehra-v3.3'; // Increment version to force update
 
 // List EVERY file you want available offline immediately
 const PRE_CACHE_ASSETS = [
@@ -53,11 +53,3 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRE_CACHE_ASSETS);
-    })
-  );
-  self.skipWaiting(); // Force the update
-});
