@@ -140,13 +140,14 @@
 
     <script src="script.js"></script>
     <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('PWA Ready:', reg.scope))
-        .catch(err => console.log('PWA Failed:', err));
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // Remove the leading slash '/' to make the path relative
+            navigator.serviceWorker.register('sw.js') 
+                .then(reg => console.log('PWA Ready:', reg.scope))
+                .catch(err => console.log('PWA Failed:', err));
+        });
+    }
+    </script>
 </body>
 </html>

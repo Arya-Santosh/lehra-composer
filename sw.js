@@ -1,35 +1,54 @@
-const CACHE_NAME = 'lehra-v2';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/library.js',
-  '/manifest.json'
+const CACHE_NAME = 'lehra-v3'; // Increment version to force update
+
+// List EVERY file you want available offline immediately
+const PRE_CACHE_ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './library.js',
+  './manifest.json',
+  // ADD YOUR AUDIO FILES HERE:
+  './assets/audio/tanpura_drone.mp3',
+  './assets/audio/teental_kirwani_madhya_santoor.mp3',
+  './assets/audio/teental_yaman_madhya_santoor.mp3'
+  './assets/audio/teental_charukeshi_madhya_santoor.mp3'
+  // Add every other .mp3 file you have in your library
 ];
 
-// 1. INSTALL: Save the core app files locally
+// 1. INSTALL: Download everything NOW
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      console.log('Pre-caching all audio and assets...');
+      return cache.addAll(PRE_CACHE_ASSETS);
+    })
+  );
+  // Force the new service worker to take over immediately
+  self.skipWaiting();
+});
+
+// 2. ACTIVATE: Clean up old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Clearing old cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
     })
   );
 });
 
-// 2. FETCH: Use cached files first, download new ones if missing
+// 3. FETCH: Serve from cache first (Instant playback)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request).then((networkResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // Cache newly downloaded MP3s automatically
-          if (event.request.url.endsWith('.mp3')) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        });
-      });
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });
