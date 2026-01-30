@@ -11,7 +11,7 @@ const PRE_CACHE_ASSETS = [
   // ADD YOUR AUDIO FILES HERE:
   './assets/audio/tanpura_drone.mp3',
   './assets/audio/teental_kirwani_madhya_santoor.mp3',
-  './assets/audio/teental_yaman_madhya_santoor.mp3'
+  './assets/audio/teental_yaman_madhya_santoor.mp3',
   './assets/audio/teental_charukeshi_madhya_santoor.mp3'
   // Add every other .mp3 file you have in your library
 ];

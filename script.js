@@ -1,7 +1,8 @@
 // ==========================================
 // LEHRA COMPOSER - FINAL RELEASE
 // ==========================================
-
+// Give the engine a 100ms cushion to prevent stutters
+Tone.context.lookAhead = 0.1;
 // --- 1. DOM ELEMENTS ---
 const playBtn = document.getElementById('playBtn');
 const tempoSlider = document.getElementById('tempoSlider');
@@ -55,10 +56,10 @@ let isTanpuraOn = false;
 
 // Lehra Player
 const player = new Tone.GrainPlayer({
-    url: "assets/audio/teental_kirwani_madhya_santoor.mp3", // Make sure this default exists!
-    loop: false, // We handle looping manually
-    grainSize: 0.1, overlap: 0.05,
-    onload: () => console.log("Lehra Initialized")
+    url: "...",
+    loop: true, // Let Tone.js handle the looping logic natively
+    grainSize: 0.2, // Larger grains are easier on the mobile CPU
+    overlap: 0.1,   // Smoother transitions between grains
 }).toDestination();
 
 // Tanpura Player
