@@ -66,15 +66,23 @@
                     </div>
 
                     <div class="slider-box">
-    <div class="slider-row">
-        <div class="fader-label">
-            <span>TEMPO</span>
-            <span id="tempoValueLabel" class="value-readout">100 BPM</span> 
-        </div>
-        <input type="range" id="tempoSlider" min="40" max="300" value="100">
+   <div class="slider-row tempo-controller">
+    <div class="fader-label">
+        <span>TEMPO</span>
+        <span id="tempoValueLabel" class="value-readout">100 BPM</span>
     </div>
-                    <div class="slider-row" style="display: flex; align-items: center; gap: 15px;">
-        
+    
+            <div class="tempo-btn-grid">
+                <button class="t-btn nudge" data-change="-5">-5</button>
+                <button class="t-btn nudge" data-change="-1">-1</button>
+                <button class="t-btn nudge" data-change="+1">+1</button>
+                <button class="t-btn nudge" data-change="+5">+5</button>
+                <button class="t-btn multi" data-multi="0.5">0.5x</button>
+                <button class="t-btn multi" data-multi="2">2x</button>
+            </div>
+
+            <input type="range" id="tempoSlider" min="40" max="300" value="100">
+        </div>
         <div style="flex-grow: 1;">
             <div class="fader-label">
                 <span>PITCH OFFSET</span>

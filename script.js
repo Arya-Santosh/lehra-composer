@@ -359,3 +359,26 @@ const enforceMin = (e) => {
 };
 bpmIncreaseStep.addEventListener('change', enforceMin);
 intervalMinutes.addEventListener('change', enforceMin);
+
+// Tempo Button Logic
+document.querySelectorAll('.t-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        let newBpm = currentBpm;
+
+        // Handle Nudges (+1, -5, etc)
+        if (button.dataset.change) {
+            newBpm += parseInt(button.dataset.change);
+        }
+
+        // Handle Multipliers (0.5x, 2x)
+        if (button.dataset.multi) {
+            newBpm = Math.round(currentBpm * parseFloat(button.dataset.multi));
+        }
+
+        // Enforce Min/Max boundaries (40 - 300)
+        newBpm = Math.max(40, Math.min(300, newBpm));
+
+        // Use our existing update function to sync everything
+        updateTempo(newBpm);
+    });
+});
