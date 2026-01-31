@@ -64,8 +64,8 @@ let isTanpuraOn = false;
 const player = new Tone.GrainPlayer({
     url: "...",
     loop: true, // Let Tone.js handle the looping logic natively
-    grainSize: 0.2, // Larger grains are easier on the mobile CPU
-    overlap: 0.1,   // Smoother transitions between grains
+    grainSize: 0.1, // Larger grains are easier on the mobile CPU
+    overlap: 0.05,   // Smoother transitions between grains
 }).toDestination();
 
 // Tanpura Player
@@ -84,7 +84,7 @@ function getLayaCategory(bpm) {
 }
 
 function getBaseBpmForLaya(laya) {
-    if (laya === "vilambit") return 40; 
+    if (laya === "vilambit") return 60; 
     if (laya === "madhya") return 100;
     if (laya === "drut") return 150;
     return 100;
